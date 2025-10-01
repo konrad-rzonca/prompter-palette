@@ -1,0 +1,19 @@
+{
+  "name": "Prompt Magnitude Builder",
+  "short_name": "PMB",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#06B6D4",
+  "background_color": "#06B6D4",
+  "display": "standalone"
+}
