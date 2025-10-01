@@ -4,26 +4,23 @@ import { Gauge, Tag, X } from 'lucide-react'
 import DiscreteSlider from './DiscreteSlider.jsx'
 
 export default function AxisCard({
-                                     axis, selection, chains, terms, labels,
-                                     onSelectGradable, onClearGradable, onChangeGradable, onDragGradable,
+                                     axis, selection,
+                                     onClearGradable, onChangeGradable, onDragGradable,
                                      onToggleNonGradable
                                  }) {
     const isGrad = axis.kind === 'gradable'
     const Icon = isGrad ? Gauge : Tag
+    const terms = axis.terms || []
 
     // Gradable data
-    const chain = chains.find(c => c.axisId === axis.id)
-    const chainCount = isGrad ? (chain?.termIds?.length || 0) : 0
-    const valueIndex = isGrad && chain && selection.gradable[axis.id]
-        ? chain.termIds.findIndex(id => id === selection.gradable[axis.id])
-        : -1
+    const labels = terms.map(t => t.label)
+    const selectedGradableId = selection.gradable[axis.id]
+    const valueIndex = selectedGradableId ? terms.findIndex(t => t.id === selectedGradableId) : -1
     const hasGradSelection = isGrad && valueIndex >= 0
-
-    // Determine the label of the selected point
     const selectedLabel = hasGradSelection ? labels[valueIndex] : ''
 
     // Non-gradable data
-    const nonTerms = !isGrad ? terms.filter(t => t.axisId === axis.id) : []
+    const nonTerms = !isGrad ? terms : []
     const selectedNon = new Set(selection.nonGradable[axis.id] || [])
 
     return (
@@ -49,19 +46,17 @@ export default function AxisCard({
             <div className="axis-body">
                 {isGrad ? (
                     <DiscreteSlider
-                        count={chainCount || 2}
+                        count={terms.length || 2}
                         valueIndex={hasGradSelection ? valueIndex : null}
                         labels={labels}
                         selectedLabel={selectedLabel}
                         onChange={(i) => {
-                            if (!chain) return
-                            const id = chain.termIds[i]
-                            onChangeGradable(axis.id, id)
+                            if (!terms[i]) return
+                            onChangeGradable(axis.id, terms[i].id)
                         }}
                         onDrag={(i) => {
-                            if (!chain) return
-                            const id = chain.termIds[i]
-                            onDragGradable(axis.id, id)
+                            if (!terms[i]) return
+                            onDragGradable(axis.id, terms[i].id)
                         }}
                     />
                 ) : (

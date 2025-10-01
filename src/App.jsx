@@ -4,8 +4,8 @@ import Sidebar from './components/Sidebar.jsx'
 import AxisCard from './components/AxisCard.jsx'
 import TopPrompt from './components/TopPrompt.jsx'
 import RightNav from './components/RightNav.jsx'
-import { BROADER_GROUPS, AXES, CHAINS, TERMS, TEMPLATE_SLOTS, PROFILE_DEFAULT } from './data/sampleData.js'
-import { buildPrompt, computeChips, slotOrderedChipIds } from './lib/promptBuilder.js'
+import { BROADER_GROUPS, AXES, TEMPLATE_SLOTS, PROFILE_DEFAULT } from './data/sampleData.js'
+import { buildPrompt } from './lib/promptBuilder.js'
 import { searchFilter } from './lib/search.js'
 import { loadState, saveState, pushHistory } from './lib/persist.js'
 
@@ -38,11 +38,11 @@ export default function App() {
             return (a.displayOrder ?? 0) - (b.displayOrder ?? 0)
         })
 
-        // 4. Search filter
-        return query ? base.filter(a => searchFilter(a, query, TERMS)) : base
+        // 4. Search filter (now simplified)
+        return query ? base.filter(a => searchFilter(a, query)) : base
     }, [groupFilter, mode, query])
 
-    const prompt = useMemo(() => buildPrompt(activeSelection, PROFILE_DEFAULT, TEMPLATE_SLOTS, AXES, TERMS), [activeSelection])
+    const prompt = useMemo(() => buildPrompt(activeSelection, PROFILE_DEFAULT, TEMPLATE_SLOTS, AXES), [activeSelection])
     useEffect(() => {
         // Only push to history when a selection is committed, not during live drag
         if (!liveSelection && prompt?.trim()) {
@@ -50,6 +50,7 @@ export default function App() {
         }
     }, [prompt, liveSelection])
 
+    // Selections now use the term's unique id string as the identifier
     const selectGradable = (axisId, termId) => setSelection(s => ({ ...s, gradable: { ...s.gradable, [axisId]: termId } }))
     const clearGradable = (axisId) => {
         setLiveSelection(null) // Also clear the live selection state
@@ -69,7 +70,6 @@ export default function App() {
             gradable: { ...selection.gradable, [axisId]: termId },
         })
     }
-
     const toggleNonGradable = (axisId, termId) => setSelection(s => {
         const existing = new Set(s.nonGradable[axisId] || [])
         existing.has(termId) ? existing.delete(termId) : existing.add(termId)
@@ -94,15 +94,13 @@ export default function App() {
             <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
                 <div className="mx-auto max-w-6xl px-4 py-2 flex items-center gap-3">
                     <Sparkles className="w-5 h-5 text-slate-900" />
-                    <h1 className="text-sm font-semibold text-slate-900">Prompt Magnitude Builder</h1>
+                    <h1 className="text-sm font-semibold text-slate-900">Prompter Palette</h1>
                     <span className="ml-auto text-xs text-slate-500 flex items-center gap-1"><Info className="w-4 h-4" /> Demo data</span>
                 </div>
             </header>
 
-            {/* Minimal top prompt bar */}
             <TopPrompt prompt={prompt} onClearAll={clearAll} />
 
-            {/* Side rails (outside width, xl+) */}
             <div className="side-rail side-left hidden xl:block">
                 <Sidebar
                     groups={BROADER_GROUPS}
@@ -123,7 +121,6 @@ export default function App() {
                 />
             </div>
 
-            {/* Central content only */}
             <main className="mx-auto max-w-6xl px-4 mt-8 mb-8">
                 <section className="space-y-6">
                     {groupedAxes.map(({ group, axes }) => (
@@ -133,29 +130,17 @@ export default function App() {
                                 <span>{group.name}</span>
                             </div>
                             <div className="group-wrap">
-                                {axes.map(axis => {
-                                    // Find the labels for the current axis if it's gradable
-                                    const chain = axis.kind === 'gradable' ? CHAINS.find(c => c.axisId === axis.id) : null
-                                    const labels = chain
-                                        ? chain.termIds.map(tid => TERMS.find(t => t.id === tid)?.label || '')
-                                        : []
-
-                                    return (
-                                        <AxisCard
-                                            key={axis.id}
-                                            axis={axis}
-                                            selection={activeSelection}
-                                            chains={CHAINS}
-                                            terms={TERMS}
-                                            labels={labels}
-                                            onSelectGradable={selectGradable}
-                                            onClearGradable={clearGradable}
-                                            onChangeGradable={changeGradable}
-                                            onDragGradable={dragGradable}
-                                            onToggleNonGradable={toggleNonGradable}
-                                        />
-                                    )
-                                })}
+                                {axes.map(axis => (
+                                    <AxisCard
+                                        key={axis.id}
+                                        axis={axis}
+                                        selection={activeSelection}
+                                        onClearGradable={clearGradable}
+                                        onChangeGradable={changeGradable}
+                                        onDragGradable={dragGradable}
+                                        onToggleNonGradable={toggleNonGradable}
+                                    />
+                                ))}
                             </div>
                         </div>
                     ))}
@@ -164,7 +149,6 @@ export default function App() {
                     )}
                 </section>
             </main>
-
         </div>
     )
 }

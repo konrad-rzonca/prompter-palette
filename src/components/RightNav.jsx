@@ -1,10 +1,11 @@
-﻿import React, { useEffect, useState } from 'react'
-import { Save, BookMarked, Copy, Trash2, Download } from 'lucide-react'
-import { getSaved, savePromptPreset, deleteSaved } from '../lib/persist.js'
+﻿import React, { useEffect, useState, useRef } from 'react'
+import { Save, BookMarked, Copy, Trash2, Download, FileUp } from 'lucide-react'
+import { getSaved, savePromptPreset, deleteSaved, replaceSaved } from '../lib/persist.js'
 
 export default function RightNav({ selection, prompt, onLoadSaved }) {
     const [title, setTitle] = useState('')
     const [savedItems, setSavedItems] = useState([])
+    const fileInputRef = useRef(null);
 
     const refresh = () => {
         setSavedItems(getSaved())
@@ -28,6 +29,61 @@ export default function RightNav({ selection, prompt, onLoadSaved }) {
         refresh()
     }
 
+    const handleDownloadAll = () => {
+        const data = getSaved();
+        if (data.length === 0) {
+            alert("No saved prompts to download.");
+            return;
+        }
+
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'prompt-magnitude-builder-bookmarks.json';
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleUploadClick = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!confirm("This will replace all your current bookmarks with the contents of the file. Are you sure?")) {
+            event.target.value = null; // Reset input
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const loadedData = JSON.parse(e.target.result);
+                if (!Array.isArray(loadedData)) {
+                    throw new Error("Invalid format: JSON file must contain an array.");
+                }
+                replaceSaved(loadedData);
+                refresh();
+                alert(`Successfully imported ${loadedData.length} bookmarks.`);
+            } catch (error) {
+                alert("Failed to load bookmarks. The file may be corrupted or in the wrong format.");
+                console.error("Error parsing bookmarks file:", error);
+            } finally {
+                event.target.value = null; // Reset input so the same file can be loaded again
+            }
+        };
+        reader.readAsText(file);
+    };
+
     return (
         <div className="card p-4 space-y-4">
             <div>
@@ -48,7 +104,27 @@ export default function RightNav({ selection, prompt, onLoadSaved }) {
             </div>
 
             <div>
-                <div className="text-sm font-semibold text-slate-800 mb-2">Saved prompts</div>
+                <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm font-semibold text-slate-800">Saved prompts</div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            className="btn btn-ghost !p-2"
+                            onClick={handleUploadClick}
+                            title="Load prompts from a JSON file"
+                        >
+                            <FileUp className="w-4 h-4" />
+                        </button>
+                        <button
+                            className="btn btn-ghost !p-2"
+                            onClick={handleDownloadAll}
+                            title="Download all saved prompts as JSON"
+                            disabled={savedItems.length === 0}
+                        >
+                            <Download className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+
                 {savedItems.length === 0 && <div className="text-xs text-slate-500">No saved prompts yet.</div>}
                 <ul className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
                     {savedItems.map(item => (
@@ -82,6 +158,13 @@ export default function RightNav({ selection, prompt, onLoadSaved }) {
                     ))}
                 </ul>
             </div>
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".json,application/json"
+                style={{ display: 'none' }}
+            />
         </div>
     )
 }

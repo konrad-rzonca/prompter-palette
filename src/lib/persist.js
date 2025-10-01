@@ -39,3 +39,15 @@ export const deleteSaved = (id) => {
     const arr = getSaved().filter(x => x.id !== id)
     localStorage.setItem(SAVED_KEY, JSON.stringify(arr))
 }
+
+export const replaceSaved = (newData) => {
+    try {
+        if (!Array.isArray(newData)) {
+            console.error("Loaded data is not a valid bookmark array.");
+            return;
+        }
+        localStorage.setItem(SAVED_KEY, JSON.stringify(newData));
+    } catch (error) {
+        console.error("Failed to save new bookmarks:", error);
+    }
+};

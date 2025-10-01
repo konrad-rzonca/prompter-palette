@@ -31,29 +31,44 @@ export function slotOrderedChipIds(chips, templateSlots) {
     return chips.slice().sort((a, b) => slotOrder.indexOf(a.slot) - slotOrder.indexOf(b.slot)).map(c => c.id)
 }
 
-export function buildPrompt(selection, profile, templateSlots, axes, terms) {
-    const axisToSlot = {}
-    templateSlots.forEach(s => s.axisIds.forEach(aid => axisToSlot[aid] = s.id))
-    const slotTexts = {}
-    const addToSlot = (slotId, text) => { if (!text) return; (slotTexts[slotId] ||= []).push(text) }
+export function buildPrompt(selection, profile, templateSlots, axes) {
+    const axisToSlot = {};
+    templateSlots.forEach(s => s.axisIds.forEach(aid => axisToSlot[aid] = s.id));
+    const slotTexts = {};
+    const addToSlot = (slotId, text) => { if (!text) return; (slotTexts[slotId] ||= []).push(text) };
+
+    const findAndAddTerm = (axisId, termId, isGradable) => {
+        const axis = axes.find(a => a.id === axisId);
+        if (!axis || !axis.terms) return;
+
+        const term = axis.terms.find(t => t.id === termId);
+        if (!term) return;
+
+        let text = term.prompt || term.label;
+        if (isGradable) {
+            const mod = selection.modifiers[axisId] || '';
+            text = (mod ? `${mod} ` : '') + text;
+        }
+        addToSlot(axisToSlot[axisId], text);
+    };
 
     Object.entries(selection.gradable).forEach(([axisId, termId]) => {
-        const term = terms.find(t => t.id === termId)
-        const mod = selection.modifiers[axisId] || ''
-        if (term) addToSlot(axisToSlot[axisId], (mod ? `${mod} ` : '') + (term.promptText ?? term.label))
-    })
-    Object.entries(selection.nonGradable).forEach(([axisId, arr]) => {
-        ;(arr || []).forEach(termId => {
-            const term = terms.find(t => t.id === termId)
-            if (term) addToSlot(axisToSlot[axisId], term.promptText ?? term.label)
-        })
-    })
+        findAndAddTerm(axisId, termId, true);
+    });
 
-    const parts = []
+    Object.entries(selection.nonGradable).forEach(([axisId, arr]) => {
+        (arr || []).forEach(termId => {
+            findAndAddTerm(axisId, termId, false);
+        });
+    });
+
+    const parts = [];
     profile.slotOrder.forEach(slotId => {
-        const s = templateSlots.find(x => x.id === slotId)
-        const items = slotTexts[slotId]
-        if (items && items.length) parts.push(items.join(s.joiner || profile.punctuationStyle.termSep))
-    })
-    return parts.join(profile.punctuationStyle.slotSep).trim()
+        const s = templateSlots.find(x => x.id === slotId);
+        const items = slotTexts[slotId];
+        if (items && items.length) {
+            parts.push(items.join(s.joiner || profile.punctuationStyle.termSep));
+        }
+    });
+    return parts.join(profile.punctuationStyle.slotSep).trim();
 }
