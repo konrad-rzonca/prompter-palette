@@ -1,0 +1,129 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Root & layout variables ===== */
+:root {
+    color-scheme: light;
+
+    /* Central content width (matches max-w-6xl = 72rem) */
+    --content-max: 72rem;
+
+    /* Header & topbar dynamic measurements (JS updates --topbar-h) */
+    --header-h: 56px;  /* header height */
+    --topbar-h: 88px;  /* default; TopPrompt measures actual height */
+
+    /* Side-rail geometry */
+    --rail-gap: 16px;
+    --rail-w: 280px;
+}
+
+/* ===== Base atoms ===== */
+.card { @apply bg-white rounded-2xl shadow-soft border border-slate-200; }
+
+.btn         { @apply inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition; }
+.btn-primary { @apply bg-slate-900 text-white hover:bg-slate-800; }
+.btn-outline { @apply border border-slate-300 text-slate-700 hover:bg-slate-50; }
+.btn-light   { @apply bg-slate-100 text-slate-800 hover:bg-slate-200; }
+.btn-ghost   { @apply text-slate-700 hover:bg-slate-100; }
+
+.input { @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none ring-0 focus:border-slate-400; }
+
+.dot      { @apply inline-block w-2 h-2 rounded-full; }
+.dot-grad { @apply bg-blue-600; }
+.dot-non  { @apply bg-amber-600; }
+
+/* Compact, consistent axis cards */
+.axis-head { @apply flex items-center gap-2; }
+.axis-title { @apply text-xs font-semibold text-slate-800 truncate; }
+.axis-body { @apply mt-3 space-y-2; }
+
+/* Group headers & layout */
+.group-head { @apply flex items-center gap-2 text-xs font-semibold text-slate-700 px-1; }
+.group-wrap { @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3; }
+
+/* Segmented control */
+.segmented { @apply grid grid-cols-3 gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200; }
+.segmented button { @apply text-xs font-medium px-2 py-1.5 rounded-lg text-slate-700; }
+.segmented button[aria-pressed="true"] { @apply bg-white shadow border border-slate-200 text-slate-900; }
+
+/* ===== Top prompt bar (simple, compact) ===== */
+.topbar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 40;
+    backdrop-filter: blur(6px);
+    background: rgba(255,255,255,0.9);
+    border-bottom: 1px solid rgb(226,232,240);
+}
+
+/* ===== Side rails (left/right, outside content) ===== */
+.side-rail {
+    position: fixed;
+    width: var(--rail-w);
+    top: calc(var(--header-h) + var(--topbar-h) + 16px);
+    z-index: 30;
+}
+@media (min-width: 1280px) {
+    .side-left  { left:  calc(50% - var(--content-max)/2 - var(--rail-gap) - var(--rail-w)); }
+    .side-right { right: calc(50% - var(--content-max)/2 - var(--rail-gap) - var(--rail-w)); }
+}
+@media (max-width: 1279.98px) {
+    .side-rail { display: none; }
+}
+
+/* ===== Discrete slider (drag-to-snap) ===== */
+.dslider { @apply w-full select-none py-2; }
+.dslider-track {
+    @apply relative h-1.5 rounded-full bg-slate-200 cursor-pointer;
+}
+.dslider-fill {
+    @apply absolute left-0 top-0 h-full rounded-full bg-blue-600;
+    pointer-events: none;
+    transition: width 100ms ease;
+}
+.dslider-stops {
+    @apply absolute inset-0 w-full h-full flex items-center justify-between;
+    pointer-events: none;
+}
+.dslider-stop {
+    @apply absolute h-full -translate-x-1/2 flex items-center;
+}
+.dslider-stop-dot {
+    @apply w-1.5 h-1.5 rounded-full bg-white;
+    pointer-events: auto; /* <-- THE FIX IS HERE */
+}
+
+.dslider-thumb {
+    @apply absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-blue-600 shadow border-2 border-white z-10 cursor-grab;
+    transition: left 100ms ease, transform 150ms ease;
+}
+.dslider-thumb.dragging {
+    @apply cursor-grabbing scale-110;
+    transition: transform 150ms ease;
+}
+
+
+/* Non-gradable tags: compact & consistent */
+.term      { @apply rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs text-slate-800 hover:bg-slate-50 cursor-pointer; }
+.term.sel  { @apply bg-slate-900 text-white border-slate-900; }
+
+/* Focus styles */
+:focus-visible { outline: 2px solid rgb(15,23,42); outline-offset: 2px; }
+
+.tooltip-container {
+    @apply relative inline-flex;
+}
+.tooltip-popup {
+    @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs font-medium rounded-md shadow-lg whitespace-nowrap z-50;
+    @apply transition-opacity duration-75;
+}
+.tooltip-hidden {
+    @apply opacity-0 pointer-events-none;
+}
+.tooltip-visible {
+    @apply opacity-100;
+}
+.tooltip-arrow {
+    @apply absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-slate-800;
+}
