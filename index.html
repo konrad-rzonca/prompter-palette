@@ -11,8 +11,19 @@
             content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>Prompter Palette</title>
+    <script>
+        // Prevent theme flash on load
+        (function() {
+            try {
+                const stored = localStorage.getItem('pp-theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const shouldDark = stored === 'dark' || (stored === 'system' && prefersDark);
+                if (shouldDark) document.documentElement.classList.add('dark');
+            } catch (e) {}
+        })();
+    </script>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 dark:bg-slate-950">
 <div id="root"></div>
 <script type="module" src="/src/main.jsx"></script>
 </body>

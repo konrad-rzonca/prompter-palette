@@ -87,7 +87,7 @@ export default function RightNav({ selection, prompt, onLoadSaved }) {
     return (
         <div className="card p-4 space-y-4">
             <div>
-                <div className="text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
                     <BookMarked className="w-4 h-4" /> Bookmarks
                 </div>
                 <div className="flex gap-2">
@@ -105,7 +105,7 @@ export default function RightNav({ selection, prompt, onLoadSaved }) {
 
             <div>
                 <div className="flex items-center justify-between mb-2">
-                    <div className="text-sm font-semibold text-slate-800">Saved prompts</div>
+                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">Saved prompts</div>
                     <div className="flex items-center gap-1">
                         <button
                             className="btn btn-ghost !p-2"
@@ -125,15 +125,15 @@ export default function RightNav({ selection, prompt, onLoadSaved }) {
                     </div>
                 </div>
 
-                {savedItems.length === 0 && <div className="text-xs text-slate-500">No saved prompts yet.</div>}
+                {savedItems.length === 0 && <div className="text-xs text-slate-700 dark:text-slate-300">No saved prompts yet.</div>}
                 <ul className="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
                     {savedItems.map(item => (
-                        <li key={item.id} className="p-2 rounded-lg border border-slate-200">
-                            <div className="text-sm font-medium text-slate-800 truncate" title={item.title}>
+                        <li key={item.id} className="p-2 rounded-lg border border-slate-200 dark:border-slate-800">
+                            <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate" title={item.title}>
                                 {item.title}
                             </div>
-                            <div className="text-[11px] text-slate-500 mb-1">{new Date(item.ts).toLocaleString()}</div>
-                            <div className="text-xs text-slate-600 line-clamp-2" title={item.prompt}>{item.prompt}</div>
+                            <div className="text-[11px] text-slate-600 dark:text-slate-400 mb-1">{new Date(item.ts).toLocaleString()}</div>
+                            <div className="text-xs text-slate-700 dark:text-slate-300 line-clamp-2" title={item.prompt}>{item.prompt}</div>
                             <div className="mt-2 flex items-center gap-2">
                                 <button
                                     className="btn btn-ghost !px-2 !py-1 text-xs"
@@ -142,7 +142,7 @@ export default function RightNav({ selection, prompt, onLoadSaved }) {
                                     <Download className="w-3.5 h-3.5 mr-1" /> Load
                                 </button>
                                 <button
-                                    className="btn btn-ghost !px-2 !py-1 text-xs text-red-600 hover:bg-red-50"
+                                    className="btn btn-ghost !px-2 !py-1 text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                                     onClick={() => handleDelete(item.id)}
                                 >
                                     <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete

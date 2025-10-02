@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar.jsx'
 import AxisCard from './components/AxisCard.jsx'
 import TopPrompt from './components/TopPrompt.jsx'
 import RightNav from './components/RightNav.jsx'
+import ThemePicker from './components/ThemePicker.jsx'
 import { BROADER_GROUPS, AXES, TEMPLATE_SLOTS, PROFILE_DEFAULT } from './data/sampleData.js'
 import { buildPrompt } from './lib/promptBuilder.js'
 import { searchFilter } from './lib/search.js'
@@ -91,11 +92,16 @@ export default function App() {
 
     return (
         <div className="min-h-screen">
-            <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
+            <header className="sticky top-0 z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
                 <div className="mx-auto max-w-6xl px-4 py-2 flex items-center gap-3">
-                    <Sparkles className="w-5 h-5 text-slate-900" />
-                    <h1 className="text-sm font-semibold text-slate-900">Prompter Palette</h1>
-                    <span className="ml-auto text-xs text-slate-500 flex items-center gap-1"><Info className="w-4 h-4" /> Demo data</span>
+                    <Sparkles className="w-5 h-5 text-slate-900 dark:text-slate-100" />
+                    <h1 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Prompter Palette</h1>
+                    <span className="ml-auto text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                        <Info className="w-4 h-4" /> Demo data
+                    </span>
+                    <div className="ml-3">
+                        <ThemePicker />
+                    </div>
                 </div>
             </header>
 
@@ -121,12 +127,12 @@ export default function App() {
                 />
             </div>
 
-            <main className="mx-auto max-w-6xl px-4 mt-8 mb-8">
+            <main className="mx-auto max-w-6xl px-4 mt-8 mb-8 text-slate-900 dark:text-slate-100">
                 <section className="space-y-6">
                     {groupedAxes.map(({ group, axes }) => (
                         <div key={group.id}>
                             <div className="group-head mb-2">
-                                <span className="dot bg-slate-500"></span>
+                                <span className="dot bg-slate-600 dark:bg-slate-400"></span>
                                 <span>{group.name}</span>
                             </div>
                             <div className="group-wrap">
@@ -145,7 +151,7 @@ export default function App() {
                         </div>
                     ))}
                     {groupedAxes.length === 0 && (
-                        <div className="card p-6 text-slate-600 text-sm">No axes match the current filters.</div>
+                        <div className="card p-6 text-slate-700 dark:text-slate-300 text-sm">No axes match the current filters.</div>
                     )}
                 </section>
             </main>
