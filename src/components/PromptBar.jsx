@@ -1,8 +1,25 @@
-﻿import React, { useState } from 'react'
+﻿import React, { useState, useRef, useEffect } from 'react'
 import { Copy, Check } from 'lucide-react'
 
 export default function PromptBar({ chips, prompt, onRemove }) {
     const [copied, setCopied] = useState(false)
+    const taRef = useRef(null)
+
+    const autosize = () => {
+        const ta = taRef.current
+        if (!ta) return
+        ta.style.height = 'auto'
+        const maxPx = Math.round(window.innerHeight * 0.4) // bottom bar can be taller
+        ta.style.height = Math.min(ta.scrollHeight, maxPx) + 'px'
+    }
+
+    useEffect(() => { autosize() }, [prompt])
+    useEffect(() => {
+        const onResize = () => autosize()
+        window.addEventListener('resize', onResize)
+        return () => window.removeEventListener('resize', onResize)
+    }, [])
+
     const copy = async () => {
         try {
             await navigator.clipboard.writeText(prompt)
@@ -34,11 +51,14 @@ export default function PromptBar({ chips, prompt, onRemove }) {
                     </div>
 
                     <div className="flex items-center gap-2">
-            <textarea
-                className="input !text-sm !h-24"
-                readOnly
-                value={prompt}
-            />
+                        <textarea
+                            ref={taRef}
+                            className="input !text-sm no-scrollbar"
+                            readOnly
+                            value={prompt}
+                            rows={1}
+                            style={{ overflow: 'hidden' }}
+                        />
                         <button className="btn btn-primary h-24" onClick={copy}>
                             {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
                             {copied ? 'Copied' : 'Copy'}
